@@ -1,9 +1,26 @@
+import { db } from '../db';
+import { productsTable, inventoryTable, notificationsTable } from '../db/schema';
 import { type DeleteInput } from '../schema';
+import { eq } from 'drizzle-orm';
 
-export async function deleteProduct(input: DeleteInput): Promise<void> {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is deleting a product from the database.
-    // Should also delete related inventory entries and notifications.
-    // Should check if product is referenced by inventory before deletion.
-    return Promise.resolve();
-}
+export const deleteProduct = async (input: DeleteInput): Promise<void> => {
+  try {
+    // First, delete related inventory entries
+    await db.delete(inventoryTable)
+      .where(eq(inventoryTable.product_id, input.id))
+      .execute();
+
+    // Delete related notifications
+    await db.delete(notificationsTable)
+      .where(eq(notificationsTable.entity_id, input.id))
+      .execute();
+
+    // Finally, delete the product
+    await db.delete(productsTable)
+      .where(eq(productsTable.id, input.id))
+      .execute();
+  } catch (error) {
+    console.error('Product deletion failed:', error);
+    throw error;
+  }
+};

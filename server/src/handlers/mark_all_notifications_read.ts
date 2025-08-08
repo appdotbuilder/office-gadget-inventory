@@ -1,6 +1,14 @@
+import { db } from '../db';
+import { notificationsTable } from '../db/schema';
+
 export async function markAllNotificationsRead(): Promise<void> {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is marking all notifications as read in the database.
-    // Should update the read field to true for all notifications.
-    return Promise.resolve();
+  try {
+    // Update all notifications to mark them as read
+    await db.update(notificationsTable)
+      .set({ read: true })
+      .execute();
+  } catch (error) {
+    console.error('Mark all notifications read failed:', error);
+    throw error;
+  }
 }
